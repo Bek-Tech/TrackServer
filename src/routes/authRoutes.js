@@ -1,10 +1,43 @@
 const express = require ('express');
+const mongoose = require ('mongoose');
+const jwt = require ('jsonwebtoken'); // userni identifatsiya qiladi
+const User = mongoose.model ('User');
 
 const router = express.Router ();
 
-router.post ('/signup', (req, res) => {
-  console.log (req.body);
-  res.send ('you made a post request ');
+router.post ('/signup', async (req, res) => {
+  const {email, password} = req.body;
+
+  try {
+    const user = new User ({email, password});
+    await user.save ();
+
+    const token = jwt.sign ({userId: user._id}, 'MY_SECRET_KEY');
+    res.send ({token});
+  } catch (err) {
+    return res.status (422).send (err.message);
+  }
+});
+
+router.post ('/signin', async (req, res) => {
+  const {email, password} = req.body;
+  // agar email vapassword yuq bulsa error chiqar 'must provide ...'
+  if (!email || !password) {
+    return res.status (422).send ({error: 'Must provide email and password'});
+  }
+  // berilgan emailni topa olmasa  error chiqar
+  const user = await User.findOne ({email});
+  if (!user) {
+    return res.status (404).send ({error: 'Email is not found'});
+  }
+  // passswordni tekshirish
+  try {
+    await user.comparePassword (password);
+    const token = jwt.sign ({userId: user._id}, 'MY_SECRET_KEY');
+    res.send ({token});
+  } catch (err) {
+    return res.status (422).send ({error: 'Invalid password or email'});
+  }
 });
 
 module.exports = router;
