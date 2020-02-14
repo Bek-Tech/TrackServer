@@ -17,6 +17,7 @@ const mongoUri =
   'mongodb+srv://admin:12345678o@cluster0-ibsts.mongodb.net/test?retryWrites=true&w=majority'; // mongo uri have to be without space
 
 mongoose.connect (mongoUri, {
+  useUnifiedTopology: true,
   useNewUrlParser: true,
   useCreateIndex: true,
 });
