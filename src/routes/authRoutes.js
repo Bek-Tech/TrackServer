@@ -28,7 +28,7 @@ router.post ('/signin', async (req, res) => {
   // berilgan emailni topa olmasa  error chiqar
   const user = await User.findOne ({email});
   if (!user) {
-    return res.status (404).send ({error: 'Email is not found'});
+    return res.status (422).send ({error: 'Invalid password or email'});
   }
   // passswordni tekshirish
   try {

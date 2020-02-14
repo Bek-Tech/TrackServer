@@ -1,33 +1,36 @@
 require ('./models/User');
+require ('./models/Track');
 const express = require ('express');
 const mongoose = require ('mongoose');
-const authRoutes = require ('./routes/authRoutes');
 const bodyParser = require ('body-parser');
+const authRoutes = require ('./routes/authRoutes');
+const trackRoutes = require ('./routes/trackRoutes');
+const requireAuth = require ('./middlewares/requireAuth');
 
 const app = express ();
 
 app.use (bodyParser.json ());
 app.use (authRoutes);
+app.use (trackRoutes);
+
 const mongoUri =
-  'mongodb+srv://admin:12345678o@cluster0-ibsts.mongodb.net/test?retryWrites=true&w=majority'; //  mongo uri have to be with out space
+  'mongodb+srv://admin:12345678o@cluster0-ibsts.mongodb.net/test?retryWrites=true&w=majority'; // mongo uri have to be without space
 
 mongoose.connect (mongoUri, {
-  useUnifiedTopology: true,
   useNewUrlParser: true,
   useCreateIndex: true,
 });
 mongoose.connection.on ('connected', () => {
-  console.log ('connected to mongo ');
+  console.log ('Connected to mongo instance');
 });
-
 mongoose.connection.on ('error', err => {
-  console.error ('error has occurred  ', err);
+  console.error ('Error connecting to mongo', err);
 });
 
-app.get ('/', (req, res) => {
-  res.send ('Hi ');
+app.get ('/', requireAuth, (req, res) => {
+  res.send (`Your email: ${req.user.email}`);
 });
 
-app.listen (3001, () => {
-  console.log ('port 3000 is working');
+app.listen (3000, () => {
+  console.log ('Listening on port 3000');
 });
